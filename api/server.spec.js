@@ -1,45 +1,41 @@
-const request = require('supertest');
-const server = require('./server.js');
+const db = require('../database/dbConfig');
+const Users = require('../users/users-model');
 
-describe('server.js', () => {
-  it('should set the testing environment', () => {
-    expect(process.env.DB_ENV).toBe('testing');
+describe('Authentocation suit', () => {
+  describe('add()', () => {
+    beforeEach(async () => {
+      await db('users').truncate();
+    });
+
+    it('should add 1 user', async () => {
+      await Users.add({ username: 'loveMoney', password: 'lovemymoneyhoney' });
+      const users = await db('users');
+      expect(users).toHaveLength(1);
+    });
   });
 
-  describe('GET /', () => {
-    it('should return 200 ok', async () => {
-      const res = await request(server).get('/');
-      expect(res.status).toBe(200);
+  describe('find()', () => {
+    it('should return a list of users', async () => {
+      const users = await Users.find();
+      expect(users).toHaveLength(1);
     });
+  });
 
-    it('should return a json object', async () => {
-      const res = await request(server).get('/');
-      expect(res.type).toBe('application/json');
+  describe('findBy()', () => {
+    it('should return a user', async () => {
+      const user = await Users.findBy({ username: 'loveMoney' });
+      expect(user).toHaveLength(1);
     });
+  });
 
-    it('should return {api:"up"}', async () => {
-      const res = await request(server).get('/');
-      expect(res.body).toEqual({ api: 'up' });
+  describe('findById()', () => {
+    it('should return a user with a specific id', async () => {
+      const user = await Users.findById(1);
+      expect(user).toEqual({
+        id: 1,
+        username: 'loveMoney',
+        password: 'lovemymoneyhoney'
+      });
     });
   });
 });
-
-// const request = require('supertest');
-
-// const server = require('./server');
-
-// describe('server.js', () => {
-//   it('should set the testing environment', () => {
-//     expect(process.env.DB_ENV).toBe('testing');
-//   });
-// });
-
-// describe('GET /', () => {
-//   it('should return 200 ok', () => {
-//     request(server)
-//       .get('/')
-//       .then(res => {
-//         expect(res.status).toBe(200);
-//       });
-//   });
-// });
